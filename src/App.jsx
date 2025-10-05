@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Earth, Asteroid, StarField, Trajectory, Particles, Missile, NuclearExplosion } from './Scene3D';
+import { Earth, Asteroid, StarField, Trajectory, Particles, Missile, NuclearExplosion, CameraShake } from './Scene3D';
 import { getRandomThreat } from './nasaAPI';
 import './styles.css';
 
@@ -268,6 +268,13 @@ function App() {
           position={explosionPosition}
           active={explosionActive}
           onComplete={() => setExplosionActive(false)}
+        />
+        
+        {/* Camera Shake - Vibración dramática */}
+        <CameraShake 
+          active={explosionActive}
+          intensity={0.3}
+          duration={2.5}
         />
         
         {/* Partículas de explosión */}

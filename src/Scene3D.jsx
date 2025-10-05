@@ -1,5 +1,5 @@
 import React, { useRef, useMemo, useState, useEffect } from 'react';
-import { useFrame, useLoader } from '@react-three/fiber';
+import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { TextureLoader } from 'three';
 
@@ -194,21 +194,31 @@ export function Asteroid({ distance, strategy, gameState, fragments }) {
 
   return (
     <group>
-      {/* Asteroide principal */}
+      {/* Asteroide principal - MUCHO MÁS GRANDE Y VISIBLE */}
       <mesh ref={asteroidRef} castShadow>
-        <dodecahedronGeometry args={[0.4, 1]} />
+        <dodecahedronGeometry args={[0.8, 1]} />
         <meshStandardMaterial
-          color="#5a4a3a"
-          roughness={0.9}
-          metalness={0.1}
-          emissive="#331100"
-          emissiveIntensity={0.2}
+          color="#cc5522"
+          roughness={0.8}
+          metalness={0.3}
+          emissive="#ff4400"
+          emissiveIntensity={0.6}
+        />
+      </mesh>
+
+      {/* Glow exterior para máxima visibilidad */}
+      <mesh ref={asteroidRef} scale={1.2}>
+        <dodecahedronGeometry args={[0.8, 1]} />
+        <meshBasicMaterial
+          color="#ff6600"
+          transparent
+          opacity={0.3}
         />
       </mesh>
 
       {/* Trail de entrada atmosférica */}
       <mesh ref={trailRef}>
-        <coneGeometry args={[0.2, 1, 8]} />
+        <coneGeometry args={[0.3, 1.5, 8]} />
         <meshBasicMaterial
           color="#ff6600"
           transparent
@@ -356,9 +366,11 @@ export function Missile({ target, onImpact, active }) {
       trailRef.current.position.copy(currentPos);
     }
 
-    // Detectar impacto
+    // Detectar impacto - RADIO MUCHO MÁS GRANDE
     const distanceToTarget = currentPos.distanceTo(targetPos);
-    if (distanceToTarget < 0.5) {
+    console.log('Distancia al objetivo:', distanceToTarget.toFixed(2)); // Debug
+    if (distanceToTarget < 1.5) {
+      console.log('¡IMPACTO DETECTADO!'); // Debug
       setHasImpacted(true);
       onImpact && onImpact();
     }
@@ -454,6 +466,18 @@ export function NuclearExplosion({ position, active, onComplete }) {
 
   return (
     <group position={position}>
+      {/* Luz explosiva pulsante - EFECTO ESPECTACULAR */}
+      <pointLight
+        intensity={time < 0.5 ? 100 * (1 - time * 2) : 0}
+        distance={50}
+        color="#ffffff"
+      />
+      <pointLight
+        intensity={time < 2 ? 50 * (1 - time * 0.5) : 0}
+        distance={30}
+        color="#ff6600"
+      />
+
       {/* Flash inicial súper brillante */}
       <mesh ref={flashRef}>
         <sphereGeometry args={[1, 32, 32]} />
@@ -484,6 +508,17 @@ export function NuclearExplosion({ position, active, onComplete }) {
         />
       </mesh>
 
+      {/* Anillos de energía adicionales */}
+      <mesh rotation={[Math.PI / 2, 0, 0]} scale={time * 8}>
+        <ringGeometry args={[0.8, 1, 32]} />
+        <meshBasicMaterial
+          color="#ffff00"
+          transparent
+          opacity={Math.max(0, 0.8 - time * 0.4)}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
       {/* Onda expansiva primaria */}
       <mesh ref={shockwaveRef}>
         <torusGeometry args={[1, 0.3, 16, 32]} />
@@ -507,6 +542,23 @@ export function NuclearExplosion({ position, active, onComplete }) {
           wireframe
         />
       </mesh>
+
+      {/* Destellos radiales */}
+      {[0, 60, 120, 180, 240, 300].map(angle => (
+        <mesh
+          key={angle}
+          rotation={[0, 0, (angle * Math.PI) / 180]}
+          scale={[time * 5, 0.1, 1]}
+        >
+          <planeGeometry args={[2, 0.2]} />
+          <meshBasicMaterial
+            color="#ffaa00"
+            transparent
+            opacity={Math.max(0, 1 - time * 0.5)}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
     </group>
   );
 }
@@ -592,4 +644,37 @@ export function Particles({ active, position = [0, 0, 0], color = "#ffaa00", cou
       />
     </points>
   );
+}
+
+// Camera Shake - Efecto de vibración en impacto
+export function CameraShake({ active, intensity = 0.5, duration = 2 }) {
+  const { camera } = useThree();
+  const [startTime, setStartTime] = useState(0);
+  const originalPosition = useRef(camera.position.clone());
+
+  useFrame((state, delta) => {
+    if (!active) return;
+
+    if (startTime === 0) {
+      setStartTime(state.clock.elapsedTime);
+      originalPosition.current = camera.position.clone();
+    }
+
+    const elapsed = state.clock.elapsedTime - startTime;
+    
+    if (elapsed < duration) {
+      // Shake con decaimiento
+      const decay = 1 - (elapsed / duration);
+      const shakeIntensity = intensity * decay;
+      
+      camera.position.x = originalPosition.current.x + (Math.random() - 0.5) * shakeIntensity;
+      camera.position.y = originalPosition.current.y + (Math.random() - 0.5) * shakeIntensity;
+      camera.position.z = originalPosition.current.z + (Math.random() - 0.5) * shakeIntensity * 0.5;
+    } else {
+      // Restaurar posición original suavemente
+      camera.position.lerp(originalPosition.current, delta * 5);
+    }
+  });
+
+  return null;
 }
