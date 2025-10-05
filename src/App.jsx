@@ -468,7 +468,7 @@ function App() {
 
         {/* Ejecutando */}
         {gameState === 'executing' && (
-          <div className="execution-screen presidential glass animate-fade-in">
+          <div className="side-panel-left presidential glass animate-slide-left">
             <h2 className="execution-title">⚙️ EJECUTANDO OPERACIÓN</h2>
             <div className="execution-emoji">{STRATEGIES[selectedStrategy].emoji}</div>
             <p className="execution-text">{STRATEGIES[selectedStrategy].name}</p>
@@ -486,10 +486,15 @@ function App() {
 
         {/* Victoria */}
         {gameState === 'success' && (
-          <div className="result-screen success-screen animate-fade-in">
-            <div className="presidential-seal large">🦅</div>
-            <h1 className="result-title success-title">🎖️ OPERACIÓN EXITOSA 🎖️</h1>
-            <div className="result-content presidential glass">
+          <>
+            {/* Título centrado */}
+            <div className="center-message animate-fade-in">
+              <div className="presidential-seal large">🦅</div>
+              <h1 className="result-title success-title">🎖️ OPERACIÓN EXITOSA 🎖️</h1>
+            </div>
+
+            {/* Panel lateral con información */}
+            <div className="side-panel-left presidential glass animate-slide-left">
               <p className="result-message">
                 ¡Señor Presidente, el asteroide ha sido neutralizado!<br />
                 Su decisión salvó millones de vidas.<br />
@@ -530,7 +535,7 @@ function App() {
                 🔄 Nueva Crisis Global
               </button>
             </div>
-          </div>
+          </>
         )}
 
         {/* Derrota */}

@@ -193,9 +193,12 @@ export function Asteroid({ distance, strategy, gameState, fragments }) {
   });
 
   return (
-    <group>
+    <group ref={asteroidRef}>
+      {/* Luz para iluminar el asteroide */}
+      <pointLight intensity={3} distance={5} color="#ff4400" />
+
       {/* Asteroide principal - MUCHO MÁS GRANDE Y VISIBLE */}
-      <mesh ref={asteroidRef} castShadow>
+      <mesh castShadow>
         <dodecahedronGeometry args={[0.8, 1]} />
         <meshStandardMaterial
           color="#cc5522"
@@ -207,7 +210,7 @@ export function Asteroid({ distance, strategy, gameState, fragments }) {
       </mesh>
 
       {/* Glow exterior para máxima visibilidad */}
-      <mesh ref={asteroidRef} scale={1.2}>
+      <mesh scale={1.2}>
         <dodecahedronGeometry args={[0.8, 1]} />
         <meshBasicMaterial
           color="#ff6600"
@@ -347,9 +350,17 @@ export function Missile({ target, onImpact, active }) {
   const missileRef = useRef();
   const trailRef = useRef();
   const [hasImpacted, setHasImpacted] = useState(false);
+  const [logged, setLogged] = useState(false);
 
   useFrame((state, delta) => {
     if (!missileRef.current || !active || hasImpacted) return;
+
+    // Debug inicial
+    if (!logged && active) {
+      console.log('🚀 MISIL ACTIVADO! Posición inicial:', missileRef.current.position);
+      console.log('🎯 Target:', target);
+      setLogged(true);
+    }
 
     const targetPos = new THREE.Vector3(target.x, target.y, target.z);
     const currentPos = missileRef.current.position;
@@ -380,24 +391,32 @@ export function Missile({ target, onImpact, active }) {
 
   return (
     <group>
-      {/* Misil */}
+      {/* Misil - MUCHO MÁS GRANDE Y VISIBLE */}
       <mesh ref={missileRef} position={[0, -2, 3]}>
-        <cylinderGeometry args={[0.05, 0.08, 0.4, 8]} />
+        <cylinderGeometry args={[0.15, 0.2, 1.0, 8]} />
         <meshStandardMaterial
           color="#ffffff"
           emissive="#ff0000"
-          emissiveIntensity={0.5}
-          metalness={0.8}
+          emissiveIntensity={1.2}
+          metalness={0.9}
         />
       </mesh>
 
-      {/* Trail de propulsión */}
+      {/* Luz del misil para máxima visibilidad */}
+      <pointLight
+        ref={missileRef}
+        intensity={5}
+        distance={10}
+        color="#ff0000"
+      />
+
+      {/* Trail de propulsión MÁS GRANDE */}
       <mesh ref={trailRef}>
-        <coneGeometry args={[0.08, 0.6, 8]} />
+        <coneGeometry args={[0.2, 1.5, 8]} />
         <meshBasicMaterial
           color="#ff6600"
           transparent
-          opacity={0.7}
+          opacity={0.9}
         />
       </mesh>
     </group>
@@ -413,51 +432,65 @@ export function NuclearExplosion({ position, active, onComplete }) {
   const fireballRef = useRef();
   const [time, setTime] = useState(0);
 
+  // Reset timer when activated
+  useEffect(() => {
+    if (active) {
+      setTime(0);
+      console.log('💥 Explosión iniciada');
+    }
+  }, [active]);
+
   useFrame((state, delta) => {
     if (!active) return;
 
-    setTime(prev => prev + delta);
+    const newTime = time + delta;
+    setTime(newTime);
+
+    // Debug
+    if (newTime < 0.1) {
+      console.log('💥 EXPLOSIÓN ACTIVADA en posición:', position);
+    }
 
     // Flash inicial masivo
-    if (flashRef.current && time < 0.3) {
-      const flashScale = 2 + time * 20;
+    if (flashRef.current && newTime < 0.3) {
+      const flashScale = 2 + newTime * 20;
       flashRef.current.scale.setScalar(flashScale);
-      flashRef.current.material.opacity = 1 - time * 3.5;
+      flashRef.current.material.opacity = 1 - newTime * 3.5;
     }
 
     // Bola de fuego principal
     if (explosionRef.current) {
-      const scale = Math.min(12, time * 5);
+      const scale = Math.min(12, newTime * 5);
       explosionRef.current.scale.setScalar(scale);
-      explosionRef.current.material.opacity = Math.max(0, 0.9 - time * 0.25);
+      explosionRef.current.material.opacity = Math.max(0, 0.9 - newTime * 0.25);
       explosionRef.current.rotation.y += delta * 0.5;
     }
 
     // Núcleo de fuego
     if (fireballRef.current) {
-      const scale = Math.min(8, time * 4);
+      const scale = Math.min(8, newTime * 4);
       fireballRef.current.scale.setScalar(scale);
-      fireballRef.current.material.opacity = Math.max(0, 1 - time * 0.3);
+      fireballRef.current.material.opacity = Math.max(0, 1 - newTime * 0.3);
     }
 
     // Onda expansiva 1
     if (shockwaveRef.current) {
-      const waveScale = time * 10;
+      const waveScale = newTime * 10;
       shockwaveRef.current.scale.setScalar(waveScale);
-      shockwaveRef.current.material.opacity = Math.max(0, 0.7 - time * 0.12);
+      shockwaveRef.current.material.opacity = Math.max(0, 0.7 - newTime * 0.12);
       shockwaveRef.current.rotation.z += delta * 2;
     }
 
     // Onda expansiva 2 (secundaria)
-    if (shockwave2Ref.current && time > 0.5) {
-      const waveScale = (time - 0.5) * 12;
+    if (shockwave2Ref.current && newTime > 0.5) {
+      const waveScale = (newTime - 0.5) * 12;
       shockwave2Ref.current.scale.setScalar(waveScale);
-      shockwave2Ref.current.material.opacity = Math.max(0, 0.5 - (time - 0.5) * 0.15);
+      shockwave2Ref.current.material.opacity = Math.max(0, 0.5 - (newTime - 0.5) * 0.15);
       shockwave2Ref.current.rotation.z -= delta * 1.5;
     }
 
     // Completar después de 6 segundos
-    if (time > 6 && onComplete) {
+    if (newTime > 6 && onComplete) {
       onComplete();
     }
   });
@@ -479,7 +512,7 @@ export function NuclearExplosion({ position, active, onComplete }) {
       />
 
       {/* Flash inicial súper brillante */}
-      <mesh ref={flashRef}>
+      <mesh ref={flashRef} scale={2}>
         <sphereGeometry args={[1, 32, 32]} />
         <meshBasicMaterial
           color="#ffffff"
@@ -489,22 +522,22 @@ export function NuclearExplosion({ position, active, onComplete }) {
       </mesh>
 
       {/* Núcleo de fuego */}
-      <mesh ref={fireballRef}>
+      <mesh ref={fireballRef} scale={1.5}>
         <sphereGeometry args={[1, 32, 32]} />
         <meshBasicMaterial
           color="#ffff00"
           transparent
-          opacity={0}
+          opacity={1}
         />
       </mesh>
 
       {/* Bola de fuego principal */}
-      <mesh ref={explosionRef}>
+      <mesh ref={explosionRef} scale={2}>
         <sphereGeometry args={[1, 32, 32]} />
         <meshBasicMaterial
           color="#ff4500"
           transparent
-          opacity={0}
+          opacity={1}
         />
       </mesh>
 
