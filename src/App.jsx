@@ -4,66 +4,51 @@ import { Earth, Asteroid, StarField, Trajectory, Particles, Missile, NuclearExpl
 import { getRandomThreat } from './nasaAPI';
 import './styles.css';
 
-// Datos actualizados con sistema presidencial
+// Presidential defense system data
 const STRATEGIES = {
   nuclear: {
-    name: 'Misil Nuclear',
+    name: 'Nuclear Missile',
     emoji: '🚀',
     successRate: 70,
-    cost: '50 mil millones USD',
-    timeRequired: '15 minutos',
-    description: 'Interceptación con cabeza nuclear',
-    info: 'Detonación nuclear a distancia segura. Validado por NASA y DoD. Riesgo: fragmentación del asteroide.',
+    cost: '$50 billion USD',
+    timeRequired: '15 minutes',
+    description: 'Nuclear warhead interception',
+    info: 'Nuclear detonation at safe distance. Validated by NASA and DoD. Risk: asteroid fragmentation.',
     advisors: {
-      military: '✅ "Operacionalmente viable. Tenemos 3 misiles Minuteman modificados listos."',
-      science: '⚠️ "70% de éxito. Riesgo de fragmentación en 12 pedazos. Algunos podrían impactar."',
-      political: '⚠️ "Tratado de prohibición de armas nucleares espaciales. ONU protestará."',
-      economic: '💰 "Costo: $50B. Presupuesto de defensa lo cubre."'
-    }
-  },
-  kinetic: {
-    name: 'Impactador Cinético',
-    emoji: '💥',
-    successRate: 85,
-    cost: '5 mil millones USD',
-    timeRequired: '20 minutos',
-    description: 'Impacto directo sin explosivos (NASA DART)',
-    info: 'Misión DART (2022) probó esta técnica exitosamente. Desviación precisa sin fragmentación.',
-    advisors: {
-      military: '✅ "Tecnología probada. SpaceX puede lanzar en 18 minutos."',
-      science: '✅ "85% de éxito. Método más limpio. Sin fragmentación. NASA recomienda esta opción."',
-      political: '✅ "Sin controversia internacional. Colaboración con ESA y JAXA."',
-      economic: '✅ "Costo: $5B. Más económico y seguro."'
+      military: '✅ "Operationally viable. We have 3 modified Minuteman missiles ready."',
+      science: '⚠️ "70% success rate. Risk of fragmentation into 12 pieces. Some might impact."',
+      political: '⚠️ "Space nuclear weapons ban treaty. UN will protest."',
+      economic: '💰 "Cost: $50B. Defense budget covers it."'
     }
   },
   intercept: {
-    name: 'Interceptación Múltiple',
+    name: 'Multiple Intercept',
     emoji: '🎯',
     successRate: 90,
-    cost: '100 mil millones USD',
-    timeRequired: '25 minutos',
-    description: 'Salva de 5 misiles simultáneos',
-    info: 'Redundancia máxima. Sistema AEGIS + THAAD + Patriot modificados. Máxima probabilidad.',
+    cost: '$100 billion USD',
+    timeRequired: '25 minutes',
+    description: 'Salvo of 5 simultaneous missiles',
+    info: 'Maximum redundancy. Modified AEGIS + THAAD + Patriot systems. Highest probability.',
     advisors: {
-      military: '✅ "Despliegue desde 3 bases. Cobertura total. Esta es nuestra mejor opción."',
-      science: '✅ "90% de éxito. Múltiples vectores de impacto. Probabilidad más alta."',
-      political: '⚠️ "Requiere coordinar con Rusia y China. Tensiones geopolíticas."',
-      economic: '❌ "Costo: $100B. Requiere aprobación del Congreso. Déficit presupuestario."'
+      military: '✅ "Deployment from 3 bases. Full coverage. This is our best option."',
+      science: '✅ "90% success rate. Multiple impact vectors. Highest probability."',
+      political: '⚠️ "Requires coordination with Russia and China. Geopolitical tensions."',
+      economic: '❌ "Cost: $100B. Requires Congressional approval. Budget deficit."'
     }
   },
   evacuate: {
-    name: 'Evacuación Global',
+    name: 'Global Evacuation',
     emoji: '🚨',
     successRate: 0,
-    cost: '500 mil millones USD',
-    timeRequired: '60 minutos',
-    description: 'Abandonar intercepción, evacuar zona de impacto',
-    info: 'Sin intervención. Evacuación de 200 millones de personas. Pérdidas catastróficas inevitables.',
+    cost: '$500 billion USD',
+    timeRequired: '60 minutes',
+    description: 'Abandon interception, evacuate impact zone',
+    info: 'No intervention. Evacuation of 200 million people. Catastrophic losses inevitable.',
     advisors: {
-      military: '❌ "Rendición total. Inaceptable para la defensa nacional."',
-      science: '❌ "Impacto confirmado. 2.5 millones de muertes directas. Invierno nuclear 3 años."',
-      political: '❌ "Fin de su presidencia. Moción de censura inmediata. Crisis constitucional."',
-      economic: '❌ "Colapso económico global. Pérdidas: $10 trillones. Gran Depresión 2.0."'
+      military: '❌ "Total surrender. Unacceptable for national defense."',
+      science: '❌ "Impact confirmed. 2.5 million direct deaths. 3-year nuclear winter."',
+      political: '❌ "End of your presidency. Immediate censure motion. Constitutional crisis."',
+      economic: '❌ "Global economic collapse. Losses: $10 trillion. Great Depression 2.0."'
     }
   }
 };
@@ -163,7 +148,7 @@ function App() {
     setShowAdvisors(false);
 
     // Efectos visuales según estrategia
-    if (strategyKey === 'nuclear' || strategyKey === 'kinetic' || strategyKey === 'intercept') {
+    if (strategyKey === 'nuclear' || strategyKey === 'intercept') {
       setMissileActive(true);
     }
 
@@ -300,20 +285,20 @@ function App() {
         {gameState === 'briefing' && (
           <div className="briefing-screen animate-fade-in">
             <div className="presidential-seal">🦅</div>
-            <h1 className="title-main">🇺🇸 OFICINA DEL PRESIDENTE 🇺🇸</h1>
+            <h1 className="title-main">🇺🇸 OFFICE OF THE PRESIDENT 🇺🇸</h1>
             <div className="briefing-content">
               <p className="briefing-text">
-                <strong>SEÑOR PRESIDENTE</strong><br />
+                <strong>MR. PRESIDENT</strong><br />
                 <br />
-                NORAD detectó asteroide 2025-PDC en trayectoria de colisión.<br />
-                Designación: <span className="highlight">APOPHIS</span><br />
-                Impacto estimado: <span className="highlight">60 MINUTOS</span><br />
+                NORAD detected asteroid 2025-PDC on collision trajectory.<br />
+                Designation: <span className="highlight">APOPHIS</span><br />
+                Estimated impact: <span className="highlight">60 MINUTES</span><br />
                 <br />
-                Su Gabinete de Seguridad Nacional está reunido.<br />
-                La decisión recae en usted.
+                Your National Security Cabinet is assembled.<br />
+                The decision rests with you.
               </p>
               <p className="briefing-subtext">
-                Ingresando a la Sala de Situación...
+                Entering Situation Room...
               </p>
             </div>
             <div className="loading-bar">
@@ -421,11 +406,11 @@ function App() {
               </div>
             )}
 
-            {/* Menú de Estrategias estilo Gaming - Compacto en la parte inferior */}
+            {/* Strategy Menu Gaming Style - Compact at bottom */}
             {!showAdvisors && (
               <div className="game-menu-bottom">
                 <div className="menu-header">
-                  <span className="menu-title">⚔️ DEFENSES</span>
+                  <span className="menu-title">⚔️ DEFENSE OPTIONS</span>
                   <span className="menu-subtitle">Select your strategy</span>
                 </div>
                 <div className="game-strategies">
@@ -446,7 +431,7 @@ function App() {
                           className="btn-info"
                           onClick={() => consultAdvisors(key)}
                           disabled={selectedStrategy !== null}
-                          title="Consultar asesores"
+                          title="Consult advisors"
                         >
                           ℹ️
                         </button>
@@ -466,132 +451,132 @@ function App() {
           </>
         )}
 
-        {/* Ejecutando */}
+        {/* Executing */}
         {gameState === 'executing' && (
           <div className="side-panel-left presidential glass animate-slide-left">
-            <h2 className="execution-title">⚙️ EJECUTANDO OPERACIÓN</h2>
+            <h2 className="execution-title">⚙️ EXECUTING OPERATION</h2>
             <div className="execution-emoji">{STRATEGIES[selectedStrategy].emoji}</div>
             <p className="execution-text">{STRATEGIES[selectedStrategy].name}</p>
             <div className="execution-details">
-              <p>🎯 Sistema de armas activado</p>
-              <p>🚀 Misil en trayectoria de interceptación</p>
-              <p>📡 Tracking en tiempo real</p>
+              <p>🎯 Weapon systems activated</p>
+              <p>🚀 Missile on intercept trajectory</p>
+              <p>📡 Real-time tracking</p>
             </div>
             <div className="loading-bar">
               <div className="loading-progress"></div>
             </div>
-            <p className="execution-subtext">El mundo observa...</p>
+            <p className="execution-subtext">The world is watching...</p>
           </div>
         )}
 
-        {/* Victoria */}
+        {/* Victory */}
         {gameState === 'success' && (
           <>
-            {/* Título centrado */}
+            {/* Centered title */}
             <div className="center-message animate-fade-in">
               <div className="presidential-seal large">🦅</div>
-              <h1 className="result-title success-title">🎖️ OPERACIÓN EXITOSA 🎖️</h1>
+              <h1 className="result-title success-title">🎖️ OPERATION SUCCESSFUL 🎖️</h1>
             </div>
 
-            {/* Panel lateral con información */}
+            {/* Side panel with information */}
             <div className="side-panel-left presidential glass animate-slide-left">
               <p className="result-message">
-                ¡Señor Presidente, el asteroide ha sido neutralizado!<br />
-                Su decisión salvó millones de vidas.<br />
-                <strong>La humanidad está a salvo.</strong>
+                Mr. President, the asteroid has been neutralized!<br />
+                Your decision saved millions of lives.<br />
+                <strong>Humanity is safe.</strong>
               </p>
               
               <div className="stats-grid">
                 <div className="stat-item">
-                  <div className="stat-label">Estrategia</div>
+                  <div className="stat-label">Strategy</div>
                   <div className="stat-value">{STRATEGIES[selectedStrategy].name}</div>
                 </div>
                 <div className="stat-item">
-                  <div className="stat-label">Tiempo de Decisión</div>
+                  <div className="stat-label">Decision Time</div>
                   <div className="stat-value">{reactionTime}s</div>
                 </div>
                 <div className="stat-item">
-                  <div className="stat-label">Vidas Salvadas</div>
+                  <div className="stat-label">Lives Saved</div>
                   <div className="stat-value success-text">7,800,000,000</div>
                 </div>
                 <div className="stat-item">
-                  <div className="stat-label">Aprobación</div>
+                  <div className="stat-label">Approval</div>
                   <div className="stat-value success-text">94%</div>
                 </div>
               </div>
 
               <div className="news-ticker">
-                <p>📰 <strong>CNN:</strong> "Presidente lideró la operación de defensa planetaria más importante de la historia"</p>
-                <p>📰 <strong>ONU:</strong> "Medalla de Honor para el Comandante en Jefe"</p>
-                <p>📰 <strong>NASA:</strong> "Protocolo ejecutado a la perfección"</p>
+                <p>📰 <strong>CNN:</strong> "President led the most important planetary defense operation in history"</p>
+                <p>📰 <strong>UN:</strong> "Medal of Honor for the Commander in Chief"</p>
+                <p>📰 <strong>NASA:</strong> "Protocol executed to perfection"</p>
               </div>
 
               <div className="info-box">
-                <h3>📚 Análisis Técnico</h3>
+                <h3>📚 Technical Analysis</h3>
                 <p>{STRATEGIES[selectedStrategy].info}</p>
               </div>
 
               <button className="reset-button presidential" onClick={resetGame}>
-                🔄 Nueva Crisis Global
+                🔄 New Global Crisis
               </button>
             </div>
           </>
         )}
 
-        {/* Derrota */}
+        {/* Failure */}
         {gameState === 'failure' && (
           <div className="result-screen failure-screen animate-fade-in">
-            <h1 className="result-title failure-title">💥 IMPACTO CONFIRMADO 💥</h1>
+            <h1 className="result-title failure-title">💥 IMPACT CONFIRMED 💥</h1>
             <div className="result-content presidential glass">
               <p className="result-message">
-                Señor Presidente...<br />
-                El asteroide impactó la Tierra.<br />
-                <strong>Consecuencias catastróficas.</strong>
+                Mr. President...<br />
+                The asteroid has struck Earth.<br />
+                <strong>Catastrophic consequences.</strong>
               </p>
               
               <div className="stats-grid">
                 <div className="stat-item">
-                  <div className="stat-label">Estrategia</div>
+                  <div className="stat-label">Strategy</div>
                   <div className="stat-value">
-                    {selectedStrategy ? STRATEGIES[selectedStrategy].name : 'Ninguna'}
+                    {selectedStrategy ? STRATEGIES[selectedStrategy].name : 'None'}
                   </div>
                 </div>
                 <div className="stat-item">
-                  <div className="stat-label">Tiempo de Decisión</div>
+                  <div className="stat-label">Decision Time</div>
                   <div className="stat-value">{reactionTime}s</div>
                 </div>
                 <div className="stat-item">
-                  <div className="stat-label">Bajas</div>
-                  <div className="stat-value failure-text">2.5M+ directas</div>
+                  <div className="stat-label">Casualties</div>
+                  <div className="stat-value failure-text">2.5M+ direct</div>
                 </div>
                 <div className="stat-item">
-                  <div className="stat-label">Aprobación</div>
+                  <div className="stat-label">Approval</div>
                   <div className="stat-value failure-text">12%</div>
                 </div>
               </div>
 
               <div className="news-ticker failure">
-                <p>📰 <strong>Breaking:</strong> "Congreso inicia proceso de juicio político"</p>
-                <p>📰 <strong>Protestas:</strong> "Manifestaciones globales exigen renuncia"</p>
-                <p>📰 <strong>ONU:</strong> "Investigación sobre incompetencia en la respuesta"</p>
+                <p>📰 <strong>Breaking:</strong> "Congress initiates impeachment proceedings"</p>
+                <p>📰 <strong>Protests:</strong> "Global demonstrations demand resignation"</p>
+                <p>📰 <strong>UN:</strong> "Investigation into response incompetence"</p>
               </div>
 
               <div className="info-box danger">
-                <h3>📊 Consecuencias del Impacto</h3>
+                <h3>📊 Impact Consequences</h3>
                 <p>
-                  • <strong>Zona de devastación:</strong> 500 km de radio<br />
-                  • <strong>Víctimas directas:</strong> 2.5 millones<br />
-                  • <strong>Tsunami:</strong> Olas de 30m en costa oeste<br />
-                  • <strong>Invierno por impacto:</strong> 3 años<br />
-                  • <strong>Pérdidas económicas:</strong> $10 trillones<br />
-                  • <strong>Hambruna global:</strong> 500 millones afectados<br />
+                  • <strong>Devastation zone:</strong> 500 km radius<br />
+                  • <strong>Direct casualties:</strong> 2.5 million<br />
+                  • <strong>Tsunami:</strong> 30m waves on west coast<br />
+                  • <strong>Impact winter:</strong> 3 years<br />
+                  • <strong>Economic losses:</strong> $10 trillion<br />
+                  • <strong>Global famine:</strong> 500 million affected<br />
                   <br />
-                  <em>Una mejor decisión pudo haber salvado al mundo.</em>
+                  <em>A better decision could have saved the world.</em>
                 </p>
               </div>
 
               <button className="reset-button presidential" onClick={resetGame}>
-                🔄 Rehacer Historia
+                🔄 Rewrite History
               </button>
             </div>
           </div>

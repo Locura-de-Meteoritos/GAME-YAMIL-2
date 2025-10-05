@@ -189,10 +189,7 @@ export function Asteroid({ distance, strategy, gameState, fragments }) {
     }
 
     // Animaciones según la estrategia
-    if (strategy === 'kinetic' && gameState === 'executing') {
-      // Cambio de trayectoria
-      asteroidRef.current.position.x += Math.sin(state.clock.elapsedTime * 3) * 0.05;
-    } else if (gameState === 'success') {
+    if (gameState === 'success') {
       // Hacer que el asteroide desaparezca gradualmente después del éxito
       if (fadeOut > 0) {
         setFadeOut(prev => Math.max(0, prev - delta * 2));
@@ -492,20 +489,23 @@ export function Missile({ target, onImpact, active }) {
   );
 }
 
-// Explosión nuclear mejorada - MÁS GRANDE Y DRAMÁTICA
+// Explosión nuclear ÉPICA - MÁXIMO DRAMATISMO
 export function NuclearExplosion({ position, active, onComplete }) {
   const explosionRef = useRef();
   const shockwaveRef = useRef();
   const shockwave2Ref = useRef();
+  const shockwave3Ref = useRef();
   const flashRef = useRef();
   const fireballRef = useRef();
+  const plasmaRingRef = useRef();
+  const energySphereRef = useRef();
   const [time, setTime] = useState(0);
 
   // Reset timer when activated
   useEffect(() => {
     if (active) {
       setTime(0);
-      console.log('💥 Explosión iniciada');
+      console.log('💥 EPIC EXPLOSION INITIATED');
     }
   }, [active]);
 
@@ -517,49 +517,74 @@ export function NuclearExplosion({ position, active, onComplete }) {
 
     // Debug
     if (newTime < 0.1) {
-      console.log('💥 EXPLOSIÓN ACTIVADA en posición:', position);
+      console.log('💥 NUCLEAR DETONATION at position:', position);
     }
 
-    // Flash inicial masivo
-    if (flashRef.current && newTime < 0.3) {
-      const flashScale = 2 + newTime * 20;
+    // Flash inicial ULTRA masivo con pulsación
+    if (flashRef.current && newTime < 0.5) {
+      const flashScale = 3 + newTime * 30 + Math.sin(newTime * 50) * 2;
       flashRef.current.scale.setScalar(flashScale);
-      flashRef.current.material.opacity = 1 - newTime * 3.5;
+      flashRef.current.material.opacity = Math.max(0, 1 - newTime * 2.5);
     }
 
-    // Bola de fuego principal
+    // Bola de fuego principal con crecimiento orgánico
     if (explosionRef.current) {
-      const scale = Math.min(12, newTime * 5);
+      const scale = Math.min(18, newTime * 7 + Math.sin(newTime * 4) * 1.5);
       explosionRef.current.scale.setScalar(scale);
-      explosionRef.current.material.opacity = Math.max(0, 0.9 - newTime * 0.25);
-      explosionRef.current.rotation.y += delta * 0.5;
+      explosionRef.current.material.opacity = Math.max(0, 1 - newTime * 0.18);
+      explosionRef.current.rotation.y += delta * 1.2;
+      explosionRef.current.rotation.x += delta * 0.3;
     }
 
-    // Núcleo de fuego
+    // Núcleo de fuego ultra brillante con pulsación
     if (fireballRef.current) {
-      const scale = Math.min(8, newTime * 4);
+      const scale = Math.min(12, newTime * 5.5 + Math.sin(newTime * 8) * 0.8);
       fireballRef.current.scale.setScalar(scale);
-      fireballRef.current.material.opacity = Math.max(0, 1 - newTime * 0.3);
+      fireballRef.current.material.opacity = Math.max(0, 1 - newTime * 0.25);
+      fireballRef.current.rotation.z += delta * 2;
     }
 
-    // Onda expansiva 1
+    // Esfera de energía interna pulsante
+    if (energySphereRef.current) {
+      const scale = Math.min(6, newTime * 4) + Math.sin(newTime * 10) * 0.5;
+      energySphereRef.current.scale.setScalar(scale);
+      energySphereRef.current.material.opacity = Math.max(0, 0.9 - newTime * 0.3);
+    }
+
+    // Anillo de plasma horizontal épico
+    if (plasmaRingRef.current && newTime > 0.2) {
+      const ringScale = (newTime - 0.2) * 15;
+      plasmaRingRef.current.scale.setScalar(ringScale);
+      plasmaRingRef.current.material.opacity = Math.max(0, 0.9 - (newTime - 0.2) * 0.15);
+      plasmaRingRef.current.rotation.z += delta * 3;
+    }
+
+    // Onda expansiva 1 - MÁS GRANDE Y DRAMÁTICA
     if (shockwaveRef.current) {
-      const waveScale = newTime * 10;
+      const waveScale = newTime * 15;
       shockwaveRef.current.scale.setScalar(waveScale);
-      shockwaveRef.current.material.opacity = Math.max(0, 0.7 - newTime * 0.12);
-      shockwaveRef.current.rotation.z += delta * 2;
+      shockwaveRef.current.material.opacity = Math.max(0, 0.9 - newTime * 0.1);
+      shockwaveRef.current.rotation.z += delta * 3;
     }
 
-    // Onda expansiva 2 (secundaria)
-    if (shockwave2Ref.current && newTime > 0.5) {
-      const waveScale = (newTime - 0.5) * 12;
+    // Onda expansiva 2 (secundaria) - MÁS INTENSA
+    if (shockwave2Ref.current && newTime > 0.3) {
+      const waveScale = (newTime - 0.3) * 18;
       shockwave2Ref.current.scale.setScalar(waveScale);
-      shockwave2Ref.current.material.opacity = Math.max(0, 0.5 - (newTime - 0.5) * 0.15);
-      shockwave2Ref.current.rotation.z -= delta * 1.5;
+      shockwave2Ref.current.material.opacity = Math.max(0, 0.7 - (newTime - 0.3) * 0.12);
+      shockwave2Ref.current.rotation.z -= delta * 2;
     }
 
-    // Completar después de 6 segundos
-    if (newTime > 6 && onComplete) {
+    // Onda expansiva 3 (terciaria) - EFECTO ADICIONAL
+    if (shockwave3Ref.current && newTime > 0.6) {
+      const waveScale = (newTime - 0.6) * 22;
+      shockwave3Ref.current.scale.setScalar(waveScale);
+      shockwave3Ref.current.material.opacity = Math.max(0, 0.5 - (newTime - 0.6) * 0.1);
+      shockwave3Ref.current.rotation.z += delta * 1.5;
+    }
+
+    // Completar después de 8 segundos (más largo para más épico)
+    if (newTime > 8 && onComplete) {
       onComplete();
     }
   });
@@ -568,20 +593,34 @@ export function NuclearExplosion({ position, active, onComplete }) {
 
   return (
     <group position={position}>
-      {/* Luz explosiva pulsante - EFECTO ESPECTACULAR */}
+      {/* Luces explosivas ULTRA INTENSAS con múltiples colores */}
       <pointLight
-        intensity={time < 0.5 ? 100 * (1 - time * 2) : 0}
-        distance={50}
+        intensity={time < 0.3 ? 200 * (1 - time * 3.5) : 0}
+        distance={80}
         color="#ffffff"
+        decay={2}
       />
       <pointLight
-        intensity={time < 2 ? 50 * (1 - time * 0.5) : 0}
-        distance={30}
+        intensity={time < 0.5 ? 150 * (1 - time * 2) : 0}
+        distance={60}
+        color="#ffff00"
+        decay={2}
+      />
+      <pointLight
+        intensity={time < 2 ? 100 * (1 - time * 0.5) : 0}
+        distance={50}
         color="#ff6600"
+        decay={2}
+      />
+      <pointLight
+        intensity={time < 3 ? 80 * (1 - time * 0.33) : 0}
+        distance={40}
+        color="#ff0000"
+        decay={2}
       />
 
-      {/* Flash inicial súper brillante */}
-      <mesh ref={flashRef} scale={2}>
+      {/* Flash inicial ULTRA brillante con distorsión */}
+      <mesh ref={flashRef} scale={3}>
         <sphereGeometry args={[1, 32, 32]} />
         <meshBasicMaterial
           color="#ffffff"
@@ -590,7 +629,17 @@ export function NuclearExplosion({ position, active, onComplete }) {
         />
       </mesh>
 
-      {/* Núcleo de fuego */}
+      {/* Esfera de energía interna pulsante */}
+      <mesh ref={energySphereRef} scale={1}>
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshBasicMaterial
+          color="#00ffff"
+          transparent
+          opacity={0.9}
+        />
+      </mesh>
+
+      {/* Núcleo de fuego ultra brillante */}
       <mesh ref={fireballRef} scale={1.5}>
         <sphereGeometry args={[1, 32, 32]} />
         <meshBasicMaterial
@@ -600,7 +649,7 @@ export function NuclearExplosion({ position, active, onComplete }) {
         />
       </mesh>
 
-      {/* Bola de fuego principal */}
+      {/* Bola de fuego principal MASIVA */}
       <mesh ref={explosionRef} scale={2}>
         <sphereGeometry args={[1, 32, 32]} />
         <meshBasicMaterial
@@ -610,22 +659,63 @@ export function NuclearExplosion({ position, active, onComplete }) {
         />
       </mesh>
 
-      {/* Anillos de energía adicionales */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} scale={time * 8}>
-        <ringGeometry args={[0.8, 1, 32]} />
+      {/* Capa externa de fuego naranja */}
+      <mesh scale={explosionRef.current ? explosionRef.current.scale.x * 1.3 : 2.6}>
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshBasicMaterial
+          color="#ff6600"
+          transparent
+          opacity={Math.max(0, 0.6 - time * 0.12)}
+        />
+      </mesh>
+
+      {/* Capa de humo/calor distorsionado */}
+      <mesh scale={explosionRef.current ? explosionRef.current.scale.x * 1.5 : 3}>
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshBasicMaterial
+          color="#882200"
+          transparent
+          opacity={Math.max(0, 0.4 - time * 0.08)}
+        />
+      </mesh>
+
+      {/* Anillos de energía múltiples con diferentes velocidades */}
+      <mesh rotation={[Math.PI / 2, 0, 0]} scale={time * 10}>
+        <ringGeometry args={[0.7, 1.2, 64]} />
         <meshBasicMaterial
           color="#ffff00"
           transparent
-          opacity={Math.max(0, 0.8 - time * 0.4)}
+          opacity={Math.max(0, 1 - time * 0.35)}
           side={THREE.DoubleSide}
         />
       </mesh>
 
-      {/* Onda expansiva primaria */}
-      <mesh ref={shockwaveRef}>
-        <torusGeometry args={[1, 0.3, 16, 32]} />
+      <mesh rotation={[Math.PI / 2, 0, time * 2]} scale={time * 12}>
+        <ringGeometry args={[0.5, 1.0, 64]} />
         <meshBasicMaterial
-          color="#ffaa44"
+          color="#ff6600"
+          transparent
+          opacity={Math.max(0, 0.8 - time * 0.3)}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* Anillo de plasma horizontal ÉPICO */}
+      <mesh ref={plasmaRingRef} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1, 0.15, 32, 100]} />
+        <meshBasicMaterial
+          color="#00ffff"
+          transparent
+          opacity={0}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* Ondas expansivas con geometría más compleja */}
+      <mesh ref={shockwaveRef}>
+        <torusGeometry args={[1, 0.4, 32, 100]} />
+        <meshBasicMaterial
+          color="#ffff00"
           transparent
           opacity={0}
           side={THREE.DoubleSide}
@@ -633,9 +723,8 @@ export function NuclearExplosion({ position, active, onComplete }) {
         />
       </mesh>
 
-      {/* Onda expansiva secundaria */}
       <mesh ref={shockwave2Ref}>
-        <torusGeometry args={[1, 0.2, 16, 32]} />
+        <torusGeometry args={[1, 0.3, 32, 100]} />
         <meshBasicMaterial
           color="#ff8844"
           transparent
@@ -645,22 +734,74 @@ export function NuclearExplosion({ position, active, onComplete }) {
         />
       </mesh>
 
-      {/* Destellos radiales */}
-      {[0, 60, 120, 180, 240, 300].map(angle => (
+      <mesh ref={shockwave3Ref}>
+        <torusGeometry args={[1, 0.25, 32, 100]} />
+        <meshBasicMaterial
+          color="#ff4422"
+          transparent
+          opacity={0}
+          side={THREE.DoubleSide}
+          wireframe
+        />
+      </mesh>
+
+      {/* Destellos radiales MÁS NUMEROSOS (12 rayos) */}
+      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map(angle => (
         <mesh
           key={angle}
           rotation={[0, 0, (angle * Math.PI) / 180]}
-          scale={[time * 5, 0.1, 1]}
+          scale={[time * 8, 0.15, 1]}
         >
-          <planeGeometry args={[2, 0.2]} />
+          <planeGeometry args={[2.5, 0.3]} />
           <meshBasicMaterial
             color="#ffaa00"
             transparent
-            opacity={Math.max(0, 1 - time * 0.5)}
+            opacity={Math.max(0, 1 - time * 0.4)}
             blending={THREE.AdditiveBlending}
           />
         </mesh>
       ))}
+
+      {/* Rayos verticales adicionales para más profundidad */}
+      {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => (
+        <mesh
+          key={`v${angle}`}
+          rotation={[Math.PI / 2, 0, (angle * Math.PI) / 180]}
+          scale={[time * 7, 0.12, 1]}
+        >
+          <planeGeometry args={[2, 0.25]} />
+          <meshBasicMaterial
+            color="#ff6600"
+            transparent
+            opacity={Math.max(0, 0.8 - time * 0.35)}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
+
+      {/* Partículas de chispa brillantes */}
+      {[...Array(8)].map((_, i) => {
+        const angle = (i / 8) * Math.PI * 2;
+        const distance = time * 5;
+        return (
+          <mesh
+            key={`spark${i}`}
+            position={[
+              Math.cos(angle) * distance,
+              Math.sin(angle) * distance * 0.5,
+              Math.sin(angle * 2) * distance * 0.3
+            ]}
+            scale={Math.max(0, 1.5 - time * 0.3)}
+          >
+            <sphereGeometry args={[0.3, 16, 16]} />
+            <meshBasicMaterial
+              color="#ffff00"
+              transparent
+              opacity={Math.max(0, 1 - time * 0.4)}
+            />
+          </mesh>
+        );
+      })}
     </group>
   );
 }
