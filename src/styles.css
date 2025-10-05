@@ -629,3 +629,847 @@ body {
     font-size: 1.8rem;
   }
 }
+
+/* ===============================================
+   ESTILOS GAMING HUD
+   =============================================== */
+
+/* HUD Superior */
+.hud-top {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.hud-left {
+  display: flex;
+  gap: 15px;
+  pointer-events: auto;
+}
+
+.hud-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(66, 133, 244, 0.5);
+  padding: 10px 15px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.hud-icon {
+  font-size: 1.5rem;
+}
+
+.hud-label {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.65rem;
+  color: #888;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.hud-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Countdown Circular */
+.hud-countdown {
+  pointer-events: auto;
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.countdown-circle {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.countdown-circle svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(0deg);
+}
+
+.countdown-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+  font-weight: 900;
+  font-family: 'Roboto Mono', monospace;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(66, 133, 244, 0.8);
+}
+
+.hud-countdown.critical .countdown-text {
+  color: #ff0000;
+  text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+  animation: blink 0.5s infinite;
+}
+
+/* Barra de distancia */
+.distance-bar {
+  position: absolute;
+  top: 160px;
+  left: 20px;
+  right: 20px;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 102, 0, 0.5);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.distance-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff0000, #ff6600, #ffaa00);
+  transition: width 1s linear;
+  box-shadow: 0 0 10px rgba(255, 102, 0, 0.8);
+}
+
+.distance-text {
+  position: absolute;
+  top: -25px;
+  right: 0;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.8rem;
+  color: #ff6600;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 102, 0, 0.6);
+}
+
+/* Menú de Estrategias Gaming - Parte Inferior */
+.game-menu-bottom {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 1100px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid rgba(66, 133, 244, 0.5);
+  border-radius: 15px;
+  padding: 15px;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.7);
+}
+
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.menu-title {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #4285f4;
+  letter-spacing: 2px;
+}
+
+.menu-subtitle {
+  font-size: 0.75rem;
+  color: #888;
+  font-style: italic;
+}
+
+.game-strategies {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.game-strategy-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.game-strategy-card:hover {
+  background: rgba(66, 133, 244, 0.1);
+  border-color: #4285f4;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(66, 133, 244, 0.3);
+}
+
+.strategy-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.strategy-content {
+  flex-grow: 1;
+}
+
+.strategy-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 5px;
+}
+
+.strategy-quick-stats {
+  display: flex;
+  gap: 8px;
+}
+
+.success-badge, .cost-badge {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.success-badge.high {
+  background: rgba(15, 157, 88, 0.3);
+  color: #0f9d58;
+  border: 1px solid #0f9d58;
+}
+
+.success-badge.medium {
+  background: rgba(244, 180, 0, 0.3);
+  color: #f4b400;
+  border: 1px solid #f4b400;
+}
+
+.success-badge.low {
+  background: rgba(255, 102, 0, 0.3);
+  color: #ff6600;
+  border: 1px solid #ff6600;
+}
+
+.cost-badge {
+  background: rgba(66, 133, 244, 0.2);
+  color: #4285f4;
+  border: 1px solid #4285f4;
+}
+
+.strategy-buttons {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-info, .btn-launch {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.75rem;
+}
+
+.btn-info {
+  background: rgba(66, 133, 244, 0.3);
+  color: #4285f4;
+  border: 1px solid #4285f4;
+  width: 35px;
+  padding: 8px 6px;
+}
+
+.btn-info:hover:not(:disabled) {
+  background: rgba(66, 133, 244, 0.5);
+  box-shadow: 0 3px 10px rgba(66, 133, 244, 0.5);
+}
+
+.btn-launch {
+  background: linear-gradient(135deg, #ff6600, #ff0000);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(255, 102, 0, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-launch:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 102, 0, 0.6);
+}
+
+.btn-info:disabled, .btn-launch:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Panel de Asesores Compacto */
+.advisor-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  animation: fadeIn 0.3s ease;
+}
+
+.advisor-compact {
+  width: 90%;
+  max-width: 600px;
+  padding: 25px;
+  border-radius: 15px;
+  border: 2px solid rgba(66, 133, 244, 0.5);
+}
+
+.advisor-compact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.advisor-compact-header h3 {
+  font-size: 1.3rem;
+  color: #ffd700;
+}
+
+.close-btn-small {
+  background: rgba(255, 0, 0, 0.3);
+  border: 1px solid #ff0000;
+  color: #fff;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.close-btn-small:hover {
+  background: rgba(255, 0, 0, 0.6);
+  transform: rotate(90deg);
+}
+
+.advisor-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.quick-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.85rem;
+}
+
+.stat-icon {
+  font-size: 1.2rem;
+}
+
+.advisors-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.advisor-mini {
+  display: flex;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 3px solid #4285f4;
+  align-items: flex-start;
+}
+
+.advisor-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.advisor-mini-text {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #ddd;
+}
+
+.btn-authorize {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #0f9d58, #4285f4);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 20px rgba(66, 133, 244, 0.4);
+}
+
+.btn-authorize:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(66, 133, 244, 0.6);
+}
+
+/* Sello Presidencial */
+.presidential-seal {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  animation: pulse 3s infinite;
+}
+
+.presidential-seal.large {
+  font-size: 6rem;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+/* Header Presidencial */
+.header-panel.presidential {
+  min-width: 900px;
+}
+
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 15px;
+}
+
+.president-info {
+  display: flex;
+  gap: 20px;
+}
+
+.role {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 2px;
+}
+
+.clearance {
+  font-size: 0.8rem;
+  color: #ff6600;
+}
+
+/* Countdown Presidencial */
+.countdown.presidential {
+  background: rgba(139, 0, 0, 0.8);
+  border-color: #ffd700;
+}
+
+.countdown-hint {
+  font-size: 0.75rem;
+  color: #ccc;
+  font-style: italic;
+  margin-top: 8px;
+}
+
+/* Panel de Asesores */
+.advisors-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 900px;
+  padding: 30px;
+  border-radius: 20px;
+  z-index: 100;
+}
+
+.advisors-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.advisors-header h3 {
+  font-size: 1.5rem;
+  color: #ffd700;
+}
+
+.close-btn {
+  background: rgba(255, 0, 0, 0.3);
+  border: 1px solid #ff0000;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: rgba(255, 0, 0, 0.6);
+  transform: rotate(90deg);
+}
+
+.advisors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.advisor-card {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 15px;
+  border-radius: 10px;
+  border-left: 3px solid #4285f4;
+}
+
+.advisor-role {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffd700;
+  margin-bottom: 10px;
+}
+
+.advisor-advice {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #ddd;
+}
+
+.strategy-details {
+  background: rgba(66, 133, 244, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.strategy-details p {
+  margin: 5px 0;
+  font-family: 'Roboto Mono', monospace;
+}
+
+.execute-btn {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #0f9d58, #4285f4);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 20px rgba(66, 133, 244, 0.4);
+}
+
+.execute-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(66, 133, 244, 0.6);
+}
+
+/* Estrategias Presidenciales */
+.strategies-panel.presidential {
+  min-width: 95%;
+  max-width: 1200px;
+}
+
+.strategies-subtitle {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #888;
+  margin: -10px 0 20px 0;
+  font-style: italic;
+}
+
+.strategies-grid-presidential {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.strategy-card-presidential {
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 15px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.strategy-card-presidential:hover {
+  border-color: #ffd700;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 40px rgba(255, 215, 0, 0.3);
+}
+
+.strategy-header {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.strategy-emoji-large {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.strategy-header h3 {
+  font-size: 1rem;
+  color: #ffd700;
+}
+
+.strategy-stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 15px 0;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.7rem;
+  color: #888;
+  margin-bottom: 5px;
+}
+
+.stat-value-small {
+  font-size: 0.75rem;
+  color: #fff;
+}
+
+.strategy-description {
+  font-size: 0.8rem;
+  color: #ccc;
+  line-height: 1.4;
+  margin: 15px 0;
+  min-height: 40px;
+}
+
+.strategy-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.consult-btn, .execute-quick-btn {
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.consult-btn {
+  background: rgba(66, 133, 244, 0.3);
+  border: 1px solid #4285f4;
+  color: #fff;
+}
+
+.consult-btn:hover:not(:disabled) {
+  background: rgba(66, 133, 244, 0.5);
+  box-shadow: 0 5px 15px rgba(66, 133, 244, 0.4);
+}
+
+.execute-quick-btn {
+  background: linear-gradient(135deg, #ff6600, #ff8800);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(255, 102, 0, 0.3);
+}
+
+.execute-quick-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(255, 102, 0, 0.5);
+}
+
+.consult-btn:disabled, .execute-quick-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Pantalla de Ejecución Presidencial */
+.execution-screen.presidential {
+  width: 600px;
+}
+
+.execution-details {
+  margin: 20px 0;
+  text-align: left;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-radius: 10px;
+  border-left: 3px solid #4285f4;
+}
+
+.execution-details p {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.9rem;
+  margin: 8px 0;
+  color: #0f9d58;
+}
+
+/* Resultados Presidenciales */
+.result-content.presidential {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.news-ticker {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.news-ticker p {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.9rem;
+  margin: 10px 0;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+  line-height: 1.5;
+}
+
+.news-ticker.failure {
+  border-color: rgba(255, 0, 0, 0.5);
+}
+
+.news-ticker.failure p {
+  color: #ff6666;
+}
+
+.reset-button.presidential {
+  background: linear-gradient(135deg, #ffd700, #ff6600);
+  font-size: 1.3rem;
+  padding: 22px;
+}
+
+/* Responsive Gaming HUD */
+@media (max-width: 1200px) {
+  .strategies-grid-presidential {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .header-panel.presidential {
+    min-width: auto;
+    width: 95%;
+  }
+
+  .game-strategies {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .game-menu-bottom {
+    width: 95%;
+  }
+}
+
+@media (max-width: 768px) {
+  .strategies-grid-presidential {
+    grid-template-columns: 1fr;
+  }
+
+  .advisors-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .presidential-seal {
+    font-size: 3rem;
+  }
+
+  .title-main {
+    font-size: 1.3rem;
+  }
+
+  .strategy-emoji-large {
+    font-size: 2.5rem;
+  }
+
+  /* HUD móvil */
+  .hud-left {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .hud-item {
+    padding: 8px 12px;
+  }
+
+  .hud-countdown {
+    width: 90px;
+    height: 90px;
+  }
+
+  .countdown-text {
+    font-size: 2rem;
+  }
+
+  .game-strategies {
+    grid-template-columns: 1fr;
+  }
+
+  .game-strategy-card {
+    padding: 10px;
+  }
+
+  .strategy-icon {
+    font-size: 2rem;
+  }
+
+  .advisors-compact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .advisor-quick-stats {
+    grid-template-columns: 1fr;
+  }
+}

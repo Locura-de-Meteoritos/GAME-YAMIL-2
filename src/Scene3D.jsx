@@ -1,11 +1,78 @@
-import React, { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import React, { useRef, useMemo, useState, useEffect } from 'react';
+import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
+import { TextureLoader } from 'three';
 
-// Componente de la Tierra
+// Componente de la Tierra con texturas de la NASA
 export function Earth({ gameState }) {
   const earthRef = useRef();
+  const cloudsRef = useRef();
   const glowRef = useRef();
+  const [textures, setTextures] = useState(null);
+
+  // Cargar texturas de la NASA
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    
+    // Texturas procedurales si la API de la NASA falla
+    const createEarthTexture = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 2048;
+      canvas.height = 1024;
+      const ctx = canvas.getContext('2d');
+      
+      // Océanos
+      const gradient = ctx.createLinearGradient(0, 0, 0, 1024);
+      gradient.addColorStop(0, '#1a365d');
+      gradient.addColorStop(0.5, '#1e40af');
+      gradient.addColorStop(1, '#1a365d');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 2048, 1024);
+      
+      // Continentes
+      ctx.fillStyle = '#166534';
+      for (let i = 0; i < 50; i++) {
+        const x = Math.random() * 2048;
+        const y = Math.random() * 1024;
+        const size = Math.random() * 200 + 100;
+        ctx.beginPath();
+        ctx.ellipse(x, y, size, size * 0.6, Math.random() * Math.PI, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      return new THREE.CanvasTexture(canvas);
+    };
+
+    // Intentar cargar desde NASA EPIC API (Earth Polychromatic Imaging Camera)
+    fetch('https://api.nasa.gov/EPIC/api/natural/images?api_key=DEMO_KEY')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data[0]) {
+          const latestImage = data[0];
+          const date = latestImage.date.split(' ')[0].split('-').join('/');
+          const imageUrl = `https://epic.gsfc.nasa.gov/archive/natural/${date.split('/').join('/')}/png/${latestImage.image}.png`;
+          
+          loader.load(
+            imageUrl,
+            (texture) => {
+              texture.wrapS = THREE.RepeatWrapping;
+              texture.wrapT = THREE.RepeatWrapping;
+              setTextures({ earth: texture });
+            },
+            undefined,
+            () => {
+              // Fallback a textura procedural
+              setTextures({ earth: createEarthTexture() });
+            }
+          );
+        } else {
+          setTextures({ earth: createEarthTexture() });
+        }
+      })
+      .catch(() => {
+        setTextures({ earth: createEarthTexture() });
+      });
+  }, []);
 
   useFrame((state, delta) => {
     if (earthRef.current) {
@@ -15,7 +82,13 @@ export function Earth({ gameState }) {
       if (gameState === 'impact') {
         earthRef.current.rotation.x += Math.sin(state.clock.elapsedTime * 20) * 0.02;
         earthRef.current.rotation.z += Math.cos(state.clock.elapsedTime * 20) * 0.02;
+        earthRef.current.position.y += Math.sin(state.clock.elapsedTime * 30) * 0.01;
       }
+    }
+
+    // Rotación de nubes
+    if (cloudsRef.current) {
+      cloudsRef.current.rotation.y += delta * 0.05;
     }
 
     // Animación del glow
@@ -24,25 +97,36 @@ export function Earth({ gameState }) {
     }
   });
 
+  if (!textures) {
+    return (
+      <mesh>
+        <sphereGeometry args={[2, 32, 32]} />
+        <meshStandardMaterial color="#1a73e8" />
+      </mesh>
+    );
+  }
+
   return (
     <group position={[0, 0, 0]}>
+      {/* Tierra con textura */}
       <mesh ref={earthRef}>
-        <sphereGeometry args={[2, 64, 64]} />
+        <sphereGeometry args={[2, 128, 128]} />
         <meshStandardMaterial
-          color="#1a73e8"
+          map={textures.earth}
           roughness={0.8}
           metalness={0.2}
+          bumpScale={0.05}
         />
       </mesh>
       
-      {/* Continentes (manchas verdes) */}
-      <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[2.01, 64, 64]} />
+      {/* Capa de nubes */}
+      <mesh ref={cloudsRef}>
+        <sphereGeometry args={[2.02, 64, 64]} />
         <meshStandardMaterial
-          color="#0f9d58"
-          roughness={0.9}
+          color="#ffffff"
           transparent
-          opacity={0.6}
+          opacity={0.3}
+          roughness={1}
         />
       </mesh>
 
@@ -60,10 +144,10 @@ export function Earth({ gameState }) {
   );
 }
 
-// Componente del Asteroide
-export function Asteroid({ distance, strategy, gameState }) {
+// Componente del Asteroide mejorado
+export function Asteroid({ distance, strategy, gameState, fragments }) {
   const asteroidRef = useRef();
-  const explosionRef = useRef();
+  const trailRef = useRef();
 
   useFrame((state, delta) => {
     if (!asteroidRef.current) return;
@@ -83,15 +167,16 @@ export function Asteroid({ distance, strategy, gameState }) {
       Math.sin(angle) * currentDistance
     );
 
+    // Trail de fuego
+    if (trailRef.current && currentDistance < 6) {
+      trailRef.current.position.copy(asteroidRef.current.position);
+      const trailScale = (8 - currentDistance) / 8;
+      trailRef.current.scale.setScalar(trailScale * 0.5);
+      trailRef.current.material.opacity = trailScale * 0.6;
+    }
+
     // Animaciones según la estrategia
-    if (strategy === 'nuclear' && gameState === 'executing') {
-      // Explosión nuclear
-      if (explosionRef.current) {
-        const scale = 1 + Math.sin(state.clock.elapsedTime * 5) * 2;
-        explosionRef.current.scale.setScalar(scale);
-        explosionRef.current.material.opacity = Math.max(0, 0.8 - scale * 0.2);
-      }
-    } else if (strategy === 'kinetic' && gameState === 'executing') {
+    if (strategy === 'kinetic' && gameState === 'executing') {
       // Cambio de trayectoria
       asteroidRef.current.position.x += Math.sin(state.clock.elapsedTime * 3) * 0.05;
     } else if (gameState === 'success') {
@@ -109,27 +194,64 @@ export function Asteroid({ distance, strategy, gameState }) {
 
   return (
     <group>
-      <mesh ref={asteroidRef}>
+      {/* Asteroide principal */}
+      <mesh ref={asteroidRef} castShadow>
         <dodecahedronGeometry args={[0.4, 1]} />
         <meshStandardMaterial
           color="#5a4a3a"
           roughness={0.9}
           metalness={0.1}
+          emissive="#331100"
+          emissiveIntensity={0.2}
         />
       </mesh>
 
-      {/* Explosión (visible solo con estrategia nuclear) */}
-      {strategy === 'nuclear' && (
-        <mesh ref={explosionRef} position={asteroidRef.current?.position}>
-          <sphereGeometry args={[1, 32, 32]} />
-          <meshBasicMaterial
-            color="#ff6600"
-            transparent
-            opacity={0}
-          />
-        </mesh>
-      )}
+      {/* Trail de entrada atmosférica */}
+      <mesh ref={trailRef}>
+        <coneGeometry args={[0.2, 1, 8]} />
+        <meshBasicMaterial
+          color="#ff6600"
+          transparent
+          opacity={0}
+        />
+      </mesh>
+
+      {/* Fragmentos si fue destruido */}
+      {fragments && fragments.map((frag, i) => (
+        <Fragment key={i} data={frag} index={i} />
+      ))}
     </group>
+  );
+}
+
+// Fragmento de asteroide
+function Fragment({ data, index }) {
+  const ref = useRef();
+
+  useFrame((state, delta) => {
+    if (ref.current) {
+      ref.current.position.x += data.velocity.x * delta;
+      ref.current.position.y += data.velocity.y * delta;
+      ref.current.position.z += data.velocity.z * delta;
+      ref.current.rotation.x += delta * 2;
+      ref.current.rotation.y += delta * 1.5;
+      
+      // Fade out
+      if (ref.current.material.opacity > 0) {
+        ref.current.material.opacity -= delta * 0.3;
+      }
+    }
+  });
+
+  return (
+    <mesh ref={ref} position={[data.position.x, data.position.y, data.position.z]}>
+      <dodecahedronGeometry args={[data.size, 0]} />
+      <meshStandardMaterial
+        color="#5a4a3a"
+        transparent
+        opacity={1}
+      />
+    </mesh>
   );
 }
 
@@ -210,24 +332,241 @@ export function Trajectory({ distance }) {
   );
 }
 
-// Componente de partículas para efectos
-export function Particles({ active, position = [0, 0, 0] }) {
-  const particlesRef = useRef();
-
-  const particlePositions = useMemo(() => {
-    const positions = new Float32Array(1000 * 3);
-    for (let i = 0; i < 1000; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 2;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 2;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 2;
-    }
-    return positions;
-  }, []);
+// Misil interceptor
+export function Missile({ target, onImpact, active }) {
+  const missileRef = useRef();
+  const trailRef = useRef();
+  const [hasImpacted, setHasImpacted] = useState(false);
 
   useFrame((state, delta) => {
-    if (particlesRef.current && active) {
-      particlesRef.current.rotation.y += delta;
-      particlesRef.current.scale.setScalar(1 + Math.sin(state.clock.elapsedTime * 5) * 0.5);
+    if (!missileRef.current || !active || hasImpacted) return;
+
+    const targetPos = new THREE.Vector3(target.x, target.y, target.z);
+    const currentPos = missileRef.current.position;
+    
+    // Mover hacia el objetivo
+    const direction = targetPos.clone().sub(currentPos).normalize();
+    missileRef.current.position.add(direction.multiplyScalar(delta * 8));
+    
+    // Rotar hacia el objetivo
+    missileRef.current.lookAt(targetPos);
+
+    // Trail
+    if (trailRef.current) {
+      trailRef.current.position.copy(currentPos);
+    }
+
+    // Detectar impacto
+    const distanceToTarget = currentPos.distanceTo(targetPos);
+    if (distanceToTarget < 0.5) {
+      setHasImpacted(true);
+      onImpact && onImpact();
+    }
+  });
+
+  if (!active) return null;
+
+  return (
+    <group>
+      {/* Misil */}
+      <mesh ref={missileRef} position={[0, -2, 3]}>
+        <cylinderGeometry args={[0.05, 0.08, 0.4, 8]} />
+        <meshStandardMaterial
+          color="#ffffff"
+          emissive="#ff0000"
+          emissiveIntensity={0.5}
+          metalness={0.8}
+        />
+      </mesh>
+
+      {/* Trail de propulsión */}
+      <mesh ref={trailRef}>
+        <coneGeometry args={[0.08, 0.6, 8]} />
+        <meshBasicMaterial
+          color="#ff6600"
+          transparent
+          opacity={0.7}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+// Explosión nuclear mejorada - MÁS GRANDE Y DRAMÁTICA
+export function NuclearExplosion({ position, active, onComplete }) {
+  const explosionRef = useRef();
+  const shockwaveRef = useRef();
+  const shockwave2Ref = useRef();
+  const flashRef = useRef();
+  const fireballRef = useRef();
+  const [time, setTime] = useState(0);
+
+  useFrame((state, delta) => {
+    if (!active) return;
+
+    setTime(prev => prev + delta);
+
+    // Flash inicial masivo
+    if (flashRef.current && time < 0.3) {
+      const flashScale = 2 + time * 20;
+      flashRef.current.scale.setScalar(flashScale);
+      flashRef.current.material.opacity = 1 - time * 3.5;
+    }
+
+    // Bola de fuego principal
+    if (explosionRef.current) {
+      const scale = Math.min(12, time * 5);
+      explosionRef.current.scale.setScalar(scale);
+      explosionRef.current.material.opacity = Math.max(0, 0.9 - time * 0.25);
+      explosionRef.current.rotation.y += delta * 0.5;
+    }
+
+    // Núcleo de fuego
+    if (fireballRef.current) {
+      const scale = Math.min(8, time * 4);
+      fireballRef.current.scale.setScalar(scale);
+      fireballRef.current.material.opacity = Math.max(0, 1 - time * 0.3);
+    }
+
+    // Onda expansiva 1
+    if (shockwaveRef.current) {
+      const waveScale = time * 10;
+      shockwaveRef.current.scale.setScalar(waveScale);
+      shockwaveRef.current.material.opacity = Math.max(0, 0.7 - time * 0.12);
+      shockwaveRef.current.rotation.z += delta * 2;
+    }
+
+    // Onda expansiva 2 (secundaria)
+    if (shockwave2Ref.current && time > 0.5) {
+      const waveScale = (time - 0.5) * 12;
+      shockwave2Ref.current.scale.setScalar(waveScale);
+      shockwave2Ref.current.material.opacity = Math.max(0, 0.5 - (time - 0.5) * 0.15);
+      shockwave2Ref.current.rotation.z -= delta * 1.5;
+    }
+
+    // Completar después de 6 segundos
+    if (time > 6 && onComplete) {
+      onComplete();
+    }
+  });
+
+  if (!active) return null;
+
+  return (
+    <group position={position}>
+      {/* Flash inicial súper brillante */}
+      <mesh ref={flashRef}>
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshBasicMaterial
+          color="#ffffff"
+          transparent
+          opacity={1}
+        />
+      </mesh>
+
+      {/* Núcleo de fuego */}
+      <mesh ref={fireballRef}>
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshBasicMaterial
+          color="#ffff00"
+          transparent
+          opacity={0}
+        />
+      </mesh>
+
+      {/* Bola de fuego principal */}
+      <mesh ref={explosionRef}>
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshBasicMaterial
+          color="#ff4500"
+          transparent
+          opacity={0}
+        />
+      </mesh>
+
+      {/* Onda expansiva primaria */}
+      <mesh ref={shockwaveRef}>
+        <torusGeometry args={[1, 0.3, 16, 32]} />
+        <meshBasicMaterial
+          color="#ffaa44"
+          transparent
+          opacity={0}
+          side={THREE.DoubleSide}
+          wireframe
+        />
+      </mesh>
+
+      {/* Onda expansiva secundaria */}
+      <mesh ref={shockwave2Ref}>
+        <torusGeometry args={[1, 0.2, 16, 32]} />
+        <meshBasicMaterial
+          color="#ff8844"
+          transparent
+          opacity={0}
+          side={THREE.DoubleSide}
+          wireframe
+        />
+      </mesh>
+    </group>
+  );
+}
+
+// Sistema de partículas mejorado - EXPLOSIÓN MASIVA
+export function Particles({ active, position = [0, 0, 0], color = "#ffaa00", count = 3000 }) {
+  const particlesRef = useRef();
+  const [startTime, setStartTime] = useState(0);
+
+  const { positions, velocities } = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    const velocities = new Float32Array(count * 3);
+    
+    for (let i = 0; i < count; i++) {
+      const radius = Math.random() * 0.5;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI;
+      
+      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      positions[i * 3 + 2] = radius * Math.cos(phi);
+
+      // Velocidades radiales para explosión
+      const speed = Math.random() * 3 + 1;
+      velocities[i * 3] = positions[i * 3] * speed;
+      velocities[i * 3 + 1] = positions[i * 3 + 1] * speed;
+      velocities[i * 3 + 2] = positions[i * 3 + 2] * speed;
+    }
+    return { positions, velocities };
+  }, [count]);
+
+  useFrame((state, delta) => {
+    if (!particlesRef.current || !active) return;
+
+    if (startTime === 0) {
+      setStartTime(state.clock.elapsedTime);
+    }
+
+    const elapsed = state.clock.elapsedTime - startTime;
+    const geometry = particlesRef.current.geometry;
+    const posArray = geometry.attributes.position.array;
+
+    // Actualizar posiciones con física de explosión
+    for (let i = 0; i < count; i++) {
+      posArray[i * 3] += velocities[i * 3] * delta;
+      posArray[i * 3 + 1] += velocities[i * 3 + 1] * delta;
+      posArray[i * 3 + 2] += velocities[i * 3 + 2] * delta;
+
+      // Gravedad ligera
+      velocities[i * 3 + 1] -= delta * 0.5;
+    }
+
+    geometry.attributes.position.needsUpdate = true;
+
+    // Rotación para efecto dinámico
+    particlesRef.current.rotation.y += delta * 0.5;
+    
+    // Fade out gradual
+    if (particlesRef.current.material.opacity > 0) {
+      particlesRef.current.material.opacity -= delta * 0.15;
     }
   });
 
@@ -238,16 +577,18 @@ export function Particles({ active, position = [0, 0, 0] }) {
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
-          count={particlePositions.length / 3}
-          array={particlePositions}
+          count={positions.length / 3}
+          array={positions}
           itemSize={3}
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.05}
-        color="#ffaa00"
+        size={0.08}
+        color={color}
         transparent
-        opacity={0.6}
+        opacity={1}
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
       />
     </points>
   );
