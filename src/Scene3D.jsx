@@ -148,6 +148,19 @@ export function Earth({ gameState }) {
 export function Asteroid({ distance, strategy, gameState, fragments }) {
   const asteroidRef = useRef();
   const trailRef = useRef();
+  const [isVisible, setIsVisible] = useState(true);
+  const [fadeOut, setFadeOut] = useState(1);
+
+  // Reset visibilidad cuando el juego se reinicia
+  useEffect(() => {
+    if (gameState === 'briefing' || gameState === 'situation-room') {
+      setIsVisible(true);
+      setFadeOut(1);
+      if (asteroidRef.current) {
+        asteroidRef.current.scale.setScalar(1);
+      }
+    }
+  }, [gameState]);
 
   useFrame((state, delta) => {
     if (!asteroidRef.current) return;
@@ -180,9 +193,13 @@ export function Asteroid({ distance, strategy, gameState, fragments }) {
       // Cambio de trayectoria
       asteroidRef.current.position.x += Math.sin(state.clock.elapsedTime * 3) * 0.05;
     } else if (gameState === 'success') {
-      // Desvío exitoso
-      asteroidRef.current.position.x += delta * 2;
-      asteroidRef.current.position.y += delta * 1;
+      // Hacer que el asteroide desaparezca gradualmente después del éxito
+      if (fadeOut > 0) {
+        setFadeOut(prev => Math.max(0, prev - delta * 2));
+        asteroidRef.current.scale.setScalar(fadeOut);
+      } else if (isVisible) {
+        setIsVisible(false);
+      }
     } else if (gameState === 'impact') {
       // Impacto fallido - mover hacia la Tierra
       const targetDistance = 2.2;
@@ -191,6 +208,9 @@ export function Asteroid({ distance, strategy, gameState, fragments }) {
       }
     }
   });
+
+  // No renderizar si no está visible
+  if (!isVisible && gameState === 'success') return null;
 
   return (
     <group ref={asteroidRef}>
@@ -347,35 +367,43 @@ export function Trajectory({ distance }) {
 
 // Misil interceptor
 export function Missile({ target, onImpact, active }) {
+  const groupRef = useRef();
   const missileRef = useRef();
   const trailRef = useRef();
   const [hasImpacted, setHasImpacted] = useState(false);
   const [logged, setLogged] = useState(false);
 
+  // Reset state cuando se activa
+  useEffect(() => {
+    if (active) {
+      setHasImpacted(false);
+      setLogged(false);
+      // Resetear posición inicial
+      if (groupRef.current) {
+        groupRef.current.position.set(0, -2, 3);
+      }
+    }
+  }, [active]);
+
   useFrame((state, delta) => {
-    if (!missileRef.current || !active || hasImpacted) return;
+    if (!groupRef.current || !active || hasImpacted) return;
 
     // Debug inicial
     if (!logged && active) {
-      console.log('🚀 MISIL ACTIVADO! Posición inicial:', missileRef.current.position);
+      console.log('🚀 MISIL ACTIVADO! Posición inicial:', groupRef.current.position);
       console.log('🎯 Target:', target);
       setLogged(true);
     }
 
     const targetPos = new THREE.Vector3(target.x, target.y, target.z);
-    const currentPos = missileRef.current.position;
+    const currentPos = groupRef.current.position;
     
     // Mover hacia el objetivo
     const direction = targetPos.clone().sub(currentPos).normalize();
-    missileRef.current.position.add(direction.multiplyScalar(delta * 8));
+    groupRef.current.position.add(direction.multiplyScalar(delta * 8));
     
-    // Rotar hacia el objetivo
-    missileRef.current.lookAt(targetPos);
-
-    // Trail
-    if (trailRef.current) {
-      trailRef.current.position.copy(currentPos);
-    }
+    // Rotar el grupo hacia el objetivo
+    groupRef.current.lookAt(targetPos);
 
     // Detectar impacto - RADIO MUCHO MÁS GRANDE
     const distanceToTarget = currentPos.distanceTo(targetPos);
@@ -390,33 +418,74 @@ export function Missile({ target, onImpact, active }) {
   if (!active) return null;
 
   return (
-    <group>
-      {/* Misil - MUCHO MÁS GRANDE Y VISIBLE */}
-      <mesh ref={missileRef} position={[0, -2, 3]}>
-        <cylinderGeometry args={[0.15, 0.2, 1.0, 8]} />
-        <meshStandardMaterial
+    <group ref={groupRef} position={[0, -2, 3]}>
+      {/* Punto brillante del misil - TIPO COMETA */}
+      <mesh ref={missileRef}>
+        <sphereGeometry args={[0.12, 16, 16]} />
+        <meshBasicMaterial
           color="#ffffff"
-          emissive="#ff0000"
-          emissiveIntensity={1.2}
-          metalness={0.9}
+          transparent
+          opacity={1}
         />
       </mesh>
 
-      {/* Luz del misil para máxima visibilidad */}
+      {/* Glow exterior brillante amarillo */}
+      <mesh scale={1.5}>
+        <sphereGeometry args={[0.12, 16, 16]} />
+        <meshBasicMaterial
+          color="#ffff00"
+          transparent
+          opacity={0.6}
+        />
+      </mesh>
+
+      {/* Glow exterior naranja */}
+      <mesh scale={2}>
+        <sphereGeometry args={[0.12, 16, 16]} />
+        <meshBasicMaterial
+          color="#ff8800"
+          transparent
+          opacity={0.3}
+        />
+      </mesh>
+
+      {/* Luz intensa del misil */}
       <pointLight
-        ref={missileRef}
-        intensity={5}
-        distance={10}
-        color="#ff0000"
+        intensity={10}
+        distance={15}
+        color="#ffaa00"
       />
 
-      {/* Trail de propulsión MÁS GRANDE */}
-      <mesh ref={trailRef}>
-        <coneGeometry args={[0.2, 1.5, 8]} />
+      {/* Estela tipo cometa - cono principal */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.2, 0]}>
+        <coneGeometry args={[0.2, 2.5, 8]} />
         <meshBasicMaterial
           color="#ff6600"
           transparent
-          opacity={0.9}
+          opacity={0.8}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      {/* Estela secundaria más larga y sutil */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]}>
+        <coneGeometry args={[0.12, 4.0, 8]} />
+        <meshBasicMaterial
+          color="#ff8800"
+          transparent
+          opacity={0.5}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+
+      {/* Estela terciaria muy larga */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.5, 0]}>
+        <coneGeometry args={[0.06, 5.0, 8]} />
+        <meshBasicMaterial
+          color="#ffaa44"
+          transparent
+          opacity={0.3}
+          blending={THREE.AdditiveBlending}
         />
       </mesh>
     </group>
@@ -685,8 +754,21 @@ export function CameraShake({ active, intensity = 0.5, duration = 2 }) {
   const [startTime, setStartTime] = useState(0);
   const originalPosition = useRef(camera.position.clone());
 
+  // Reset cuando se desactiva
+  useEffect(() => {
+    if (!active && startTime !== 0) {
+      setStartTime(0);
+    }
+  }, [active, startTime]);
+
   useFrame((state, delta) => {
-    if (!active) return;
+    if (!active) {
+      // Restaurar posición si se desactiva
+      if (startTime !== 0) {
+        camera.position.lerp(originalPosition.current, delta * 10);
+      }
+      return;
+    }
 
     if (startTime === 0) {
       setStartTime(state.clock.elapsedTime);

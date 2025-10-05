@@ -238,13 +238,13 @@ function App() {
     <div className="app">
       {/* Canvas 3D */}
       <Canvas
-        camera={{ position: [0, 5, 10], fov: 50 }}
+        camera={{ position: [0, 3, 12], fov: 60 }}
         className="canvas-3d"
       >
-        <ambientLight intensity={0.3} />
-        <pointLight position={[10, 10, 10]} intensity={1} />
-        <pointLight position={[-10, -10, -10]} intensity={0.5} color="#4285f4" />
-        <directionalLight position={[5, 5, 5]} intensity={0.5} />
+        <ambientLight intensity={0.4} />
+        <pointLight position={[10, 10, 10]} intensity={1.5} />
+        <pointLight position={[-10, -10, -10]} intensity={0.8} color="#4285f4" />
+        <directionalLight position={[5, 5, 5]} intensity={0.8} />
         
         <StarField />
         <Earth gameState={gameState} />
